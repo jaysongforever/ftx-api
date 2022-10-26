@@ -80,9 +80,6 @@ class FtxClient {
     return this._get('wallet/balances')
   }
 
-  getAllBalances() {
-    return this._get('wallet/all_balances')
-  }
 }
 
 const ftxClient = new FtxClient(apiKey, apiSecretKey)
