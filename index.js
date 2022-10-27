@@ -1,4 +1,5 @@
-const _axios = require('axios')
+const axios = require('axios')
+const { authenticator  } = require('otplib')
 const hmacSHA256 = require('crypto-js/hmac-sha256')
 const Hex = require('crypto-js/enc-hex')
 const HttpsProxyAgent = require("https-proxy-agent")
@@ -6,20 +7,21 @@ const httpsAgent = new HttpsProxyAgent(`http://127.0.0.1:7890`)
 
 const apiKey = ''
 const apiSecretKey = ''
-
+const totpSecret = ''
+const totpCode = authenticator.generate(totpSecret);
 class FtxClient {
-  constructor(apiKey, apiSecretKey) {
-    this.instance = _axios.create({
+  constructor(key, secretKey) {
+    this.instance = axios.create({
       proxy: false,
       httpsAgent,
       baseURL: 'https://ftx.com/api/',
-      timeout: 5000,
+      timeout: 50000,
       headers: {
         accept: 'application/json',
         'Content-Type': 'application/json; utf-8',
-        'FTX-KEY': apiKey,
+        'FTX-KEY': key,
         // 'FTX-SUBACCOUNT': subaccount,
-      },
+      }
     })
 
     // make signature
@@ -42,8 +44,8 @@ class FtxClient {
           case 'PUT':
           case 'PATCH':
             sign += `/api/${config.url}${JSON.stringify(data)}`
-        }
-        const signature = hmacSHA256(sign, apiSecretKey).toString(Hex)
+          }
+        const signature = hmacSHA256(sign, secretKey).toString(Hex)
         config.headers['FTX-SIGN'] = signature
         return config
       },
@@ -71,9 +73,9 @@ class FtxClient {
       .then(res => console.log(res.data))
       .catch(e => console.log(e.toJSON()))
   }
-
-  withdraw(coin, size, address, tag = null, password, code) {
-    return this._post('wallet/withdrawals', { coin, size, address, tag, password, code })
+  // https://docs.ftx.com/zh/#aa14f75ed6
+  withdraw(data) {
+    return this._post('wallet/withdrawals', data)
   }
 
   getBalances() {
@@ -83,6 +85,14 @@ class FtxClient {
 }
 
 const ftxClient = new FtxClient(apiKey, apiSecretKey)
-
-ftxClient.getBalances()
+ftxClient.withdraw({
+  coin: 'USDC',
+  size: 108,
+  address: '',
+  // tag: null,
+  method: 'matic',
+  password: '',
+  code: totpCode
+})
+// ftxClient.getBalances()
 
