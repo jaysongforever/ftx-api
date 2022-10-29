@@ -1,14 +1,18 @@
 const axios = require('axios')
+const random = require('random')
 const { authenticator  } = require('otplib')
 const hmacSHA256 = require('crypto-js/hmac-sha256')
 const Hex = require('crypto-js/enc-hex')
 const HttpsProxyAgent = require("https-proxy-agent")
 const httpsAgent = new HttpsProxyAgent(`http://127.0.0.1:7890`)
 
-const apiKey = ''
-const apiSecretKey = ''
-const totpSecret = ''
-const totpCode = authenticator.generate(totpSecret);
+const { apiKey, apiSecretKey, totpSecret, password }  = require('./config.json')
+const address = require('./address.json')
+
+const sleep = (time) => {
+  let startTime = new Date().getTime() + parseInt(time, 10)
+  while(new Date().getTime() < startTime) {}
+}
 class FtxClient {
   constructor(key, secretKey) {
     this.instance = axios.create({
@@ -68,10 +72,7 @@ class FtxClient {
   }
 
   _post(endpoint, data = {}) {
-    return this.instance
-      .post(endpoint, data)
-      .then(res => console.log(res.data))
-      .catch(e => console.log(e.toJSON()))
+    return this.instance.post(endpoint, data)
   }
   // https://docs.ftx.com/zh/#aa14f75ed6
   withdraw(data) {
@@ -85,14 +86,30 @@ class FtxClient {
 }
 
 const ftxClient = new FtxClient(apiKey, apiSecretKey)
-ftxClient.withdraw({
-  coin: 'USDC',
-  size: 108,
-  address: '',
-  // tag: null,
-  method: 'matic',
-  password: '',
-  code: totpCode
-})
+
+// ;(async() => {
+//   for(let i = 0; i < address.length; i++) {
+//     const totpCode = authenticator.generate(totpSecret);
+//     try {
+//       const res = await ftxClient.withdraw({
+//         coin: 'ETH',
+//         size: random.float(0.025, 0.03).toFixed(random.int(3, 5)),
+//         address: address[i],
+//         // tag: null,
+//         method: 'eth',
+//         password: password,
+//         code: totpCode
+//       })
+//       console.log('🚀 ~ file: index.js ~ line 99 ~ res', res.data)
+//       const timeInterval = random.int(8 * 60, 20 * 60)
+//       console.log('Now time:', new Date(), 'TimeInterval:', (timeInterval / 60).toFixed(2), 'Index:', i+1)
+//       sleep(timeInterval * 1000)
+//     } catch (error) {
+//       console.log('🚀 ~ file: index.js ~ line 101 ~ error', error)
+//     }
+//   }
+// })()
+
+
 // ftxClient.getBalances()
 
