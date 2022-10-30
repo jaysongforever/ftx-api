@@ -7,7 +7,7 @@ const HttpsProxyAgent = require("https-proxy-agent")
 const httpsAgent = new HttpsProxyAgent(`http://127.0.0.1:7890`)
 
 const { apiKey, apiSecretKey, totpSecret, password }  = require('./config.json')
-const address = require('./address.json')
+const address = require('./address.js')
 
 const sleep = (time) => {
   let startTime = new Date().getTime() + parseInt(time, 10)
