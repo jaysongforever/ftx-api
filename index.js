@@ -87,28 +87,35 @@ class FtxClient {
 
 const ftxClient = new FtxClient(apiKey, apiSecretKey)
 
-// ;(async() => {
-//   for(let i = 0; i < address.length; i++) {
-//     const totpCode = authenticator.generate(totpSecret);
-//     try {
-//       const res = await ftxClient.withdraw({
-//         coin: 'ETH',
-//         size: random.float(0.025, 0.03).toFixed(random.int(3, 5)),
-//         address: address[i],
-//         // tag: null,
-//         method: 'eth',
-//         password: password,
-//         code: totpCode
-//       })
-//       console.log('🚀 ~ file: index.js ~ line 99 ~ res', res.data)
-//       const timeInterval = random.int(8 * 60, 20 * 60)
-//       console.log('Now time:', new Date(), 'TimeInterval:', (timeInterval / 60).toFixed(2), 'Index:', i+1)
-//       sleep(timeInterval * 1000)
-//     } catch (error) {
-//       console.log('🚀 ~ file: index.js ~ line 101 ~ error', error)
-//     }
-//   }
-// })()
+;(async() => {
+  let timeInterval = 0
+  let times = []
+  for(let i = 0; i < address.length; i++) {
+    const randomTime = i === 0 ? 0 : random.int(8 * 60, 20 * 60)
+    times.push(randomTime)
+    timeInterval = timeInterval + randomTime
+
+    setTimeout(async() => {
+      const totpCode = authenticator.generate(totpSecret);
+      try {
+        const res = await ftxClient.withdraw({
+          coin: 'BNB',
+          size: random.float(0.025, 0.03).toFixed(random.int(3, 5)),
+          address: address[i],
+          // tag: null,
+          method: 'bsc',
+          password: password,
+          code: totpCode
+        })
+        console.log('🚀 ~ file: index.js ~ line 99 ~ res', res.data)
+        console.log('Now time:', new Date(), 'Next minutes:',i < times.length - 1 ? (times[i+1] / 60).toFixed(2) : '0', 'Number:', i + 1)
+        // sleep(timeInterval * 1000)
+      } catch (error) {
+        console.log('🚀 ~ file: index.js ~ line 101 ~ error', error)
+      }
+    }, timeInterval * 1000)
+  }
+})()
 
 
 // ftxClient.getBalances()
